@@ -1,26 +1,56 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #09090b;
+  --color-surface: #18181b;
+  --color-surface-2: #27272a;
+  --color-border: #3f3f46;
+  --color-accent: #00adb5;
+  --color-accent-dim: #00adb520;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-text: #f4f4f5;
+  --color-muted: #a1a1aa;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Lesson content prose styles */
+.lesson-prose h2 {
+  @apply text-xl font-semibold text-zinc-100 mt-8 mb-3;
+}
+.lesson-prose h3 {
+  @apply text-lg font-medium text-zinc-200 mt-6 mb-2;
+}
+.lesson-prose p {
+  @apply text-zinc-300 leading-relaxed mb-4;
+}
+.lesson-prose code {
+  @apply font-mono text-sm bg-zinc-800 text-cyan-300 px-1.5 py-0.5 rounded;
+}
+.lesson-prose pre {
+  @apply bg-zinc-900 border border-zinc-700 rounded-lg p-4 overflow-x-auto mb-4;
+}
+.lesson-prose pre code {
+  @apply bg-transparent text-zinc-200 p-0;
+}
+.lesson-prose ul {
+  @apply list-disc list-inside text-zinc-300 mb-4 space-y-1;
+}
+.lesson-prose blockquote {
+  @apply border-l-4 border-cyan-500 pl-4 text-zinc-400 italic my-4;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Monaco editor container */
+.monaco-container {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #52525b; }
