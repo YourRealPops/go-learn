@@ -94,11 +94,11 @@ func main() {
   slug: "control-flow",
   chapter: 2,
   title: "Control flow",
-  description: "if, for, and switch — Go's three control structures.",
+  description: "if, for, and switch are Go's three control structures.",
   duration: 10,
   challenge: "Write a for loop that prints numbers 1 to 10, but prints 'fizz' for multiples of 3 and 'buzz' for multiples of 5.",
   hints: [
-    "Go's only loop keyword is for — there is no while.",
+    "Go's only loop keyword is 'for', there is no 'while'.",
     "Use the modulo operator % to check divisibility: if n % 3 == 0",
     "Check fizzbuzz first (divisible by both 3 and 5) before checking each individually.",
   ],
@@ -204,14 +204,14 @@ if err != nil {
     fmt.Println(i)
 }</code></pre>
   <h2>if / else</h2>
-  <p>Standard conditional — no parentheses needed around the condition:</p>
+  <p>Standard conditional; no parentheses needed around the condition:</p>
   <pre><code>if x > 0 {
     fmt.Println("positive")
 } else {
     fmt.Println("non-positive")
 }</code></pre>
   <h2>switch</h2>
-  <p>Go's switch doesn't fall through by default — no need for break:</p>
+  <p>Go's switch doesn't fall through by default, no need for break:</p>
   <pre><code>switch day {
 case "Monday":
     fmt.Println("Start of the week")
