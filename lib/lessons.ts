@@ -56,9 +56,9 @@ func main() {
     slug: "functions",
     chapter: 2,
     title: "Functions & multiple returns",
-    description: "Go functions can return multiple values — this is idiomatic, not a quirk.",
+    description: "Go functions can return multiple values; this is idiomatic, not a quirk.",
     duration: 15,
-    challenge: "Write a divide(a, b float64) function that returns (float64, error). Return an error if b is zero. Call it twice — once with valid inputs, once with b=0.",
+    challenge: "Write a divide(a, b float64) function that returns (float64, error). Return an error if b is zero. Call it twice; once with valid inputs, once with b=0.",
     hints: [
       "Use errors.New(\"message\") from the errors package to create an error value.",
       "Check the error with: result, err := divide(10, 2); if err != nil { ... }",
@@ -107,13 +107,13 @@ function getContentHtml(slug: string): string {
   const content: Record<string, string> = {
     "why-go": `
       <h2>What is Go?</h2>
-      <p>Go (or Golang) is a statically typed, compiled language designed at Google in 2007 by Robert Griesemer, Rob Pike, and Ken Thompson. It was built to solve real engineering problems at scale — slow compile times, complex dependency management, and painful concurrency.</p>
+      <p>Go (or Golang) is a statically typed, compiled language designed at Google in 2007 by Robert Griesemer, Rob Pike, and Ken Thompson. It was built to solve real engineering problems at scale, slow compile times, complex dependency management, and painful concurrency.</p>
       <h2>The Go philosophy</h2>
       <p>Go has an opinionated design: <em>fewer features, done well</em>. There's usually one obvious way to do something. This makes codebases written by different people feel consistent and readable.</p>
       <ul>
-        <li><strong>Simplicity</strong> — if you can't explain a feature, it probably doesn't belong</li>
-        <li><strong>Explicitness</strong> — code should say what it does, not hide it</li>
-        <li><strong>Composition</strong> — build complex things from small, simple pieces</li>
+        <li><strong>Simplicity</strong>: if you can't explain a feature, it probably doesn't belong</li>
+        <li><strong>Explicitness</strong>: code should say what it does, not hide it</li>
+        <li><strong>Composition</strong>: build complex things from small, simple pieces</li>
       </ul>
       <h2>Your first Go program</h2>
       <p>Every Go program needs a <code>package main</code> declaration and a <code>func main()</code> entry point. The <code>fmt</code> package provides formatted I/O.</p>
@@ -124,7 +124,7 @@ import "fmt"
 func main() {
     fmt.Println("Hello, world!")
 }</code></pre>
-      <blockquote>Go is compiled, not interpreted. When you click Run, your code is compiled to machine code and executed — that's why it's fast.</blockquote>
+      <blockquote>Go is compiled, not interpreted. When you click Run, your code is compiled to machine code and executed, that's why it's fast.</blockquote>
     `,
     "variables-and-types": `
       <h2>Declaring variables</h2>
@@ -159,7 +159,7 @@ var price float64  // 0.0</code></pre>
       <pre><code>func add(a, b int) int {
     return a + b
 }</code></pre>
-      <h2>Multiple return values — not a quirk</h2>
+      <h2>Multiple return values, not a quirk</h2>
       <p>In Go, returning multiple values is the standard way to signal errors. This is idiomatic, not a workaround:</p>
       <pre><code>func openFile(path string) (*File, error) {
     // ...
@@ -170,7 +170,7 @@ if err != nil {
     log.Fatal(err)
 }</code></pre>
       <h2>Why not exceptions?</h2>
-      <p>Go deliberately has no exceptions. Errors are just values — they appear in the type signature, can be inspected, wrapped, and passed around. This makes error handling explicit and visible, not hidden in a try/catch somewhere up the call stack.</p>
+      <p>Go deliberately has no exceptions. Errors are just values; they appear in the type signature, can be inspected, wrapped, and passed around. This makes error handling explicit and visible, not hidden in a try/catch somewhere up the call stack.</p>
       <blockquote>If a function can fail, its return type should say so. Don't hide failure paths.</blockquote>
     `,
   };

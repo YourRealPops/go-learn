@@ -1,20 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --color-bg: #09090b;
-  --color-surface: #18181b;
-  --color-surface-2: #27272a;
-  --color-border: #3f3f46;
-  --color-accent: #00adb5;
-  --color-accent-dim: #00adb520;
-  --color-success: #22c55e;
-  --color-error: #ef4444;
-  --color-warning: #f59e0b;
-  --color-text: #f4f4f5;
-  --color-muted: #a1a1aa;
-}
+@reference "tailwindcss";
 
 /* Lesson content prose styles */
 .lesson-prose h2 {
@@ -44,7 +30,7 @@
 
 /* Monaco editor container */
 .monaco-container {
-  border: 1px solid var(--color-border);
+  border: 1px solid #3f3f46;
   border-radius: 8px;
   overflow: hidden;
 }
