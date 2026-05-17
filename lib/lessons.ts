@@ -90,6 +90,30 @@ func main() {
 }
 `,
   },
+  {
+  slug: "control-flow",
+  chapter: 2,
+  title: "Control flow",
+  description: "if, for, and switch — Go's three control structures.",
+  duration: 10,
+  challenge: "Write a for loop that prints numbers 1 to 10, but prints 'fizz' for multiples of 3 and 'buzz' for multiples of 5.",
+  hints: [
+    "Go's only loop keyword is for — there is no while.",
+    "Use the modulo operator % to check divisibility: if n % 3 == 0",
+    "Check fizzbuzz first (divisible by both 3 and 5) before checking each individually.",
+  ],
+  starterCode: `package main
+
+import "fmt"
+
+func main() {
+	for i := 1; i <= 10; i++ {
+		// TODO: print fizz, buzz, or the number
+		fmt.Println(i)
+	}
+}
+`,
+},
 ];
 
 // Build the full lesson list with prev/next links and HTML content
@@ -173,6 +197,30 @@ if err != nil {
       <p>Go deliberately has no exceptions. Errors are just values; they appear in the type signature, can be inspected, wrapped, and passed around. This makes error handling explicit and visible, not hidden in a try/catch somewhere up the call stack.</p>
       <blockquote>If a function can fail, its return type should say so. Don't hide failure paths.</blockquote>
     `,
+    "control-flow": `
+  <h2>The for loop</h2>
+  <p>Go has only one looping construct: <code>for</code>. It replaces while, do-while, and foreach from other languages.</p>
+  <pre><code>for i := 0; i < 10; i++ {
+    fmt.Println(i)
+}</code></pre>
+  <h2>if / else</h2>
+  <p>Standard conditional — no parentheses needed around the condition:</p>
+  <pre><code>if x > 0 {
+    fmt.Println("positive")
+} else {
+    fmt.Println("non-positive")
+}</code></pre>
+  <h2>switch</h2>
+  <p>Go's switch doesn't fall through by default — no need for break:</p>
+  <pre><code>switch day {
+case "Monday":
+    fmt.Println("Start of the week")
+case "Friday":
+    fmt.Println("Almost weekend")
+default:
+    fmt.Println("Midweek")
+}</code></pre>
+`,
   };
   return content[slug] ?? "<p>Content coming soon.</p>";
 }
