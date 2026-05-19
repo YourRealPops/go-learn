@@ -7,7 +7,7 @@ const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GoLearn — Learn Go the right way",
+  title: "Learn2CodeGo - Learn Go the right way",
   description: "Interactive Go programming lessons with real-time code execution.",
 };
 

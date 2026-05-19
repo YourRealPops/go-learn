@@ -70,7 +70,12 @@ func main() {
 		r.Post("/api/lessons/{slug}/complete", lessonHandler.CompleteLesson)
 		r.Get("/api/progress", lessonHandler.GetProgress)
 	})
-
+	// Router for health check
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte(`{"status":"ok"}`))
+})
 	fmt.Printf("GoLearn API running on http://localhost:%s\n", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatal(err)
