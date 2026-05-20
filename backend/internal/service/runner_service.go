@@ -1,11 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -25,17 +25,21 @@ func NewRunnerService() *RunnerService {
 	}
 }
 
-// Run executes Go code and returns the output.
-// Currently proxies to the Go Playground — swap body for Docker sandbox later.
 func (s *RunnerService) Run(code string) (*RunResult, error) {
 	if strings.TrimSpace(code) == "" {
 		return nil, errors.New("no code provided")
 	}
 
-	resp, err := s.client.PostForm("https://play.golang.org/run", url.Values{
-		"version": {"2"},
-		"body":    {code},
+	payload, _ := json.Marshal(map[string]string{
+		"version": "2",
+		"body":    code,
 	})
+
+	resp, err := s.client.Post(
+		"https://play.golang.org/run",
+		"application/json",
+		bytes.NewReader(payload),
+	)
 	if err != nil {
 		return nil, errors.New("runner unavailable")
 	}
@@ -46,7 +50,6 @@ func (s *RunnerService) Run(code string) (*RunResult, error) {
 		return nil, err
 	}
 
-	// Go Playground response shape
 	var playgroundResp struct {
 		Errors string `json:"Errors"`
 		Events []struct {
@@ -56,7 +59,12 @@ func (s *RunnerService) Run(code string) (*RunResult, error) {
 	}
 
 	if err := json.Unmarshal(body, &playgroundResp); err != nil {
-		return nil, errors.New("invalid response from runner")
+		// Try plain text response as fallback
+		output := strings.TrimSpace(string(body))
+		if output == "" {
+			output = "(no output)"
+		}
+		return &RunResult{Output: output, IsError: false}, nil
 	}
 
 	if playgroundResp.Errors != "" {
