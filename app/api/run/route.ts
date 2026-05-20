@@ -4,8 +4,6 @@ const GO_BACKEND_URL = process.env.GO_BACKEND_URL ?? "http://localhost:8080";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-
-  // Forward the token if present (for authenticated runs in the future)
   const authHeader = req.headers.get("authorization") ?? "";
 
   try {
@@ -19,8 +17,17 @@ export async function POST(req: NextRequest) {
       signal: AbortSignal.timeout(20_000),
     });
 
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.ok ? 200 : res.status });
+    // Read as text first to debug
+    const text = await res.text();
+
+    // Try to parse as JSON
+    try {
+      const data = JSON.parse(text);
+      return NextResponse.json(data, { status: res.ok ? 200 : res.status });
+    } catch {
+      // If not JSON, return the raw text as output
+      return NextResponse.json({ output: text, isError: !res.ok });
+    }
   } catch (err) {
     if (err instanceof Error && err.name === "TimeoutError") {
       return NextResponse.json({ error: "Execution timed out" }, { status: 504 });
