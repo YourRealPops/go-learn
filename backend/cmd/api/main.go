@@ -52,6 +52,8 @@ func main() {
 		log.Println("Using in-memory repositories (no DATABASE_URL set)")
 	}
 
+    
+
 	// --- Services ---
 	authService := service.NewAuthService(userRepo, jwtSecret)
 	lessonService := service.NewLessonService(progressRepo)
