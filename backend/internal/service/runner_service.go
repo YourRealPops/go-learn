@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -30,39 +32,32 @@ func (s *RunnerService) Run(code string) (*RunResult, error) {
 		return nil, errors.New("no code provided")
 	}
 
-	payload, _ := json.Marshal(map[string]string{
-		"version": "2",
-		"body":    code,
-	})
-
-	// Try go.dev/play first, fall back to play.golang.org
-	urls := []string{
-		"https://go.dev/_/compile",
-		"https://play.golang.org/compile",
-	}
-
-	var lastErr error
-	for _, url := range urls {
-		result, err := s.tryRun(url, payload)
-		if err != nil {
-			lastErr = err
-			continue
-		}
+	// Try go.dev playground format
+	result, err := s.runGoDev(code)
+	if err == nil {
 		return result, nil
 	}
 
-	return nil, lastErr
+	// Fall back to play.golang.org format
+	return s.runPlayground(code)
 }
 
-func (s *RunnerService) tryRun(url string, payload []byte) (*RunResult, error) {
-	resp, err := s.client.Post(url, "application/json", bytes.NewReader(payload))
+// runGoDev uses the go.dev/play compile endpoint
+func (s *RunnerService) runGoDiv(code string) (*RunResult, error) {
+	formData := url.Values{
+		"version": {"2"},
+		"body":    {code},
+		"withVet": {"true"},
+	}
+
+	resp, err := s.client.PostForm("https://go.dev/_/compile", formData)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 404 {
-		return nil, errors.New("endpoint not found")
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("status %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -70,29 +65,30 @@ func (s *RunnerService) tryRun(url string, payload []byte) (*RunResult, error) {
 		return nil, err
 	}
 
-	// Try parsing as Go playground response
-	var playgroundResp struct {
+	var result struct {
 		Errors string `json:"Errors"`
 		Events []struct {
 			Message string `json:"Message"`
 			Kind    string `json:"Kind"`
+			Delay   int    `json:"Delay"`
 		} `json:"Events"`
+		VetErrors string `json:"VetErrors"`
 	}
 
-	if err := json.Unmarshal(body, &playgroundResp); err != nil {
-		output := strings.TrimSpace(string(body))
-		if output == "" {
-			output = "(no output)"
-		}
-		return &RunResult{Output: output, IsError: false}, nil
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, err
 	}
 
-	if playgroundResp.Errors != "" {
-		return &RunResult{Output: playgroundResp.Errors, IsError: true}, nil
+	if result.Errors != "" {
+		return &RunResult{Output: result.Errors, IsError: true}, nil
+	}
+
+	if result.VetErrors != "" {
+		return &RunResult{Output: result.VetErrors, IsError: true}, nil
 	}
 
 	var sb strings.Builder
-	for _, e := range playgroundResp.Events {
+	for _, e := range result.Events {
 		sb.WriteString(e.Message)
 	}
 
@@ -102,4 +98,64 @@ func (s *RunnerService) tryRun(url string, payload []byte) (*RunResult, error) {
 	}
 
 	return &RunResult{Output: output, IsError: false}, nil
+}
+
+// runPlayground uses the play.golang.org endpoint
+func (s *RunnerService) runPlayground(code string) (*RunResult, error) {
+	payload, _ := json.Marshal(map[string]string{
+		"version": "2",
+		"body":    code,
+	})
+
+	resp, err := s.client.Post(
+		"https://play.golang.org/run",
+		"application/json",
+		bytes.NewReader(payload),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result struct {
+		Errors string `json:"Errors"`
+		Events []struct {
+			Message string `json:"Message"`
+			Kind    string `json:"Kind"`
+		} `json:"Events"`
+	}
+
+	if err := json.Unmarshal(body, &result); err != nil {
+		output := strings.TrimSpace(string(body))
+		if output == "" {
+			output = "(no output)"
+		}
+		return &RunResult{Output: output, IsError: false}, nil
+	}
+
+	if result.Errors != "" {
+		return &RunResult{Output: result.Errors, IsError: true}, nil
+	}
+
+	var sb strings.Builder
+	for _, e := range result.Events {
+		sb.WriteString(e.Message)
+	}
+
+	output := sb.String()
+	if output == "" {
+		output = "(no output)"
+	}
+
+	return &RunResult{Output: output, IsError: false}, nil
+}
+
+// runGoDev is the exported version
+func (s *RunnerService) runGoDev(code string) (*RunResult, error) {
+	return s.runGoDiv(code)
 }
