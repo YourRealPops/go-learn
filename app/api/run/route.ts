@@ -4,6 +4,8 @@ const GO_BACKEND_URL = process.env.GO_BACKEND_URL ?? "http://localhost:8080";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
+  const backendUrl = process.env.GO_BACKEND_URL ?? "http://localhost:8080";
+  console.log("Proxying to:", `${backendUrl}/api/run`);
   const authHeader = req.headers.get("authorization") ?? "";
 
   try {
