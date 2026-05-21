@@ -35,21 +35,42 @@ func (s *RunnerService) Run(code string) (*RunResult, error) {
 		"body":    code,
 	})
 
-	resp, err := s.client.Post(
-		"https://play.golang.org/run",
-		"application/json",
-		bytes.NewReader(payload),
-	)
+	// Try go.dev/play first, fall back to play.golang.org
+	urls := []string{
+		"https://go.dev/_/compile",
+		"https://play.golang.org/compile",
+	}
+
+	var lastErr error
+	for _, url := range urls {
+		result, err := s.tryRun(url, payload)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		return result, nil
+	}
+
+	return nil, lastErr
+}
+
+func (s *RunnerService) tryRun(url string, payload []byte) (*RunResult, error) {
+	resp, err := s.client.Post(url, "application/json", bytes.NewReader(payload))
 	if err != nil {
-		return nil, errors.New("runner unavailable")
+		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		return nil, errors.New("endpoint not found")
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
+	// Try parsing as Go playground response
 	var playgroundResp struct {
 		Errors string `json:"Errors"`
 		Events []struct {
@@ -59,7 +80,6 @@ func (s *RunnerService) Run(code string) (*RunResult, error) {
 	}
 
 	if err := json.Unmarshal(body, &playgroundResp); err != nil {
-		// Try plain text response as fallback
 		output := strings.TrimSpace(string(body))
 		if output == "" {
 			output = "(no output)"
