@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Lesson } from "@/lib/types";
 
 interface LessonContentProps {
@@ -9,6 +9,11 @@ interface LessonContentProps {
 
 export default function LessonContent({ lesson }: LessonContentProps) {
   const [hintsShown, setHintsShown] = useState(0);
+
+  // Wake up the backend when lesson loads
+useEffect(() => {
+  fetch(`${process.env.NEXT_PUBLIC_API_URL}/health`).catch(() => {});
+}, []);
 
   return (
     <div className="flex flex-col h-full">
