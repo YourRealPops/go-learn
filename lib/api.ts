@@ -73,12 +73,31 @@ export async function apiGetProgress() {
   return request<Progress[]>("/api/progress");
 }
 
-// --- Runner ---
+// --- Runner (calls Render directly, bypasses Netlify proxy) ---
 export async function apiRunCode(code: string, lessonSlug?: string) {
-  return request<{ output: string; isError: boolean }>("/api/run", {
+  const token = useAuthStore.getState().token;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${BASE_URL}/api/run`, {
     method: "POST",
+    headers,
     body: JSON.stringify({ code, lessonSlug }),
   });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error ?? "Runner failed");
+  }
+
+  return data as { output: string; isError: boolean };
 }
 
 // --- Types ---

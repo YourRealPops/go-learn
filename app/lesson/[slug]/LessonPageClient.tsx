@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import LessonContent from "@/components/LessonContent";
 import OutputPanel from "@/components/OutputPanel";
 import type { Lesson } from "@/lib/types";
+import { apiRunCode } from "@/lib/api";
 
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
   ssr: false,
@@ -27,29 +28,19 @@ export default function LessonPageClient({ lesson }: LessonPageClientProps) {
   const [activeTab, setActiveTab] = useState<"output" | "tests">("output");
 
   const runCode = useCallback(async () => {
-    setIsRunning(true);
-    setOutput(null);
-    setTestResults(null);
-    try {
-      const res = await fetch("/api/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, lessonSlug: lesson.slug }),
-      });
-      const data = await res.json();
-      setOutput(data.output ?? data.error ?? "No output");
-      if (data.testResults) {
-        setTestResults(data.testResults);
-        setActiveTab("tests");
-      } else {
-        setActiveTab("output");
-      }
-    } catch {
-      setOutput("Failed to connect to the runner. Is the backend running?");
-    } finally {
-      setIsRunning(false);
-    }
-  }, [code, lesson.slug]);
+  setIsRunning(true);
+  setOutput(null);
+  setTestResults(null);
+  try {
+    const data = await apiRunCode(code, lesson.slug);
+    setOutput(data.output ?? "No output");
+    setActiveTab("output");
+  } catch (err) {
+    setOutput(err instanceof Error ? err.message : "Runner unavailable");
+  } finally {
+    setIsRunning(false);
+  }
+}, [code, lesson.slug]);
 
   const resetCode = useCallback(() => {
     setCode(lesson.starterCode);
