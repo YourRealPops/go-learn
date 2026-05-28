@@ -114,6 +114,32 @@ func main() {
 }
 `,
 },
+{
+  slug: "go-syntax",
+  chapter: 2,
+  title: "Go Syntax — The Complete Guide",
+  description: "A comprehensive walkthrough of Go's syntax — from packages to pointers.",
+  duration: 25,
+  challenge: "Write a Go program that declares a struct called Person with Name (string) and Age (int) fields. Create two people, print their details using a method called Greet() that returns a greeting string, and use a for loop to print both.",
+  hints: [
+    "Define a struct with: type Person struct { Name string; Age int }",
+    "Add a method with: func (p Person) Greet() string { return \"Hi, I'm \" + p.Name }",
+    "Create a slice of Person and range over it: for _, p := range people { fmt.Println(p.Greet()) }",
+  ],
+  starterCode: `package main
+
+import "fmt"
+
+// Define your Person struct here
+
+// Add a Greet() method here
+
+func main() {
+	// Create two people and print their greetings
+	fmt.Println("Hello from Go syntax lesson!")
+}
+`,
+},
 ];
 
 // Build the full lesson list with prev/next links and HTML content
@@ -220,6 +246,267 @@ case "Friday":
 default:
     fmt.Println("Midweek")
 }</code></pre>
+`,
+"go-syntax": `
+  <h2>1. Package & imports</h2>
+  <p>Every Go file starts with a package declaration. The <code>main</code> package is the entry point of any executable program.</p>
+  <pre><code>package main
+
+import (
+  "fmt"
+  "math"
+  "strings"
+)</code></pre>
+  <p>Unused imports are a <strong>compile error</strong> in Go — this keeps code clean by design.</p>
+
+  <h2>2. Variables</h2>
+  <p>Go has two ways to declare variables:</p>
+  <pre><code>// Explicit — works anywhere
+var name string = "Alice"
+var age int = 30
+
+// Short declaration — inside functions only
+name := "Alice"
+age := 30
+
+// Multiple at once
+var (
+  host string = "localhost"
+  port int    = 8080
+)</code></pre>
+  <p>Every variable is initialised to its <strong>zero value</strong> if not assigned — <code>""</code> for strings, <code>0</code> for numbers, <code>false</code> for booleans.</p>
+
+  <h2>3. Basic types</h2>
+  <pre><code>var s string    = "hello"
+var i int       = 42
+var f float64   = 3.14
+var b bool      = true
+var by byte     = 255    // alias for uint8
+var r rune      = 'A'    // alias for int32 (Unicode code point)</code></pre>
+
+  <h2>4. Constants</h2>
+  <pre><code>const Pi = 3.14159
+const MaxRetries = 3
+const AppName = "GoLearn"
+
+// iota — auto-incrementing constants
+type Direction int
+const (
+  North Direction = iota // 0
+  East                   // 1
+  South                  // 2
+  West                   // 3
+)</code></pre>
+
+  <h2>5. Functions</h2>
+  <pre><code>// Basic function
+func add(a, b int) int {
+  return a + b
+}
+
+// Multiple return values
+func divide(a, b float64) (float64, error) {
+  if b == 0 {
+    return 0, errors.New("division by zero")
+  }
+  return a / b, nil
+}
+
+// Named return values
+func minMax(nums []int) (min, max int) {
+  min, max = nums[0], nums[0]
+  for _, n := range nums {
+    if n < min { min = n }
+    if n > max { max = n }
+  }
+  return // naked return
+}
+
+// Variadic function
+func sum(nums ...int) int {
+  total := 0
+  for _, n := range nums {
+    total += n
+  }
+  return total
+}</code></pre>
+
+  <h2>6. Control flow</h2>
+  <pre><code>// if — no parentheses needed
+if x > 0 {
+  fmt.Println("positive")
+} else if x < 0 {
+  fmt.Println("negative")
+} else {
+  fmt.Println("zero")
+}
+
+// if with init statement
+if err := doSomething(); err != nil {
+  fmt.Println("error:", err)
+}
+
+// switch — no fallthrough by default
+switch day {
+case "Monday", "Tuesday":
+  fmt.Println("early week")
+case "Friday":
+  fmt.Println("almost weekend")
+default:
+  fmt.Println("midweek")
+}
+
+// switch with no condition — replaces if/else chains
+switch {
+case age < 18:
+  fmt.Println("minor")
+case age < 65:
+  fmt.Println("adult")
+default:
+  fmt.Println("senior")
+}</code></pre>
+
+  <h2>7. Loops</h2>
+  <p>Go has only one loop keyword: <code>for</code>. It does the job of for, while, and do-while.</p>
+  <pre><code>// Classic for loop
+for i := 0; i < 10; i++ {
+  fmt.Println(i)
+}
+
+// While-style
+n := 1
+for n < 100 {
+  n *= 2
+}
+
+// Infinite loop
+for {
+  // runs forever — use break to exit
+}
+
+// Range over slice
+fruits := []string{"apple", "banana", "cherry"}
+for i, fruit := range fruits {
+  fmt.Println(i, fruit)
+}
+
+// Range over map
+ages := map[string]int{"Alice": 30, "Bob": 25}
+for name, age := range ages {
+  fmt.Printf("%s is %d years old\n", name, age)
+}</code></pre>
+
+  <h2>8. Arrays, slices & maps</h2>
+  <pre><code>// Array — fixed size
+var arr [3]int = [3]int{1, 2, 3}
+
+// Slice — dynamic, most common
+nums := []int{1, 2, 3, 4, 5}
+nums = append(nums, 6)
+slice := nums[1:4] // [2, 3, 4]
+
+// Make a slice with length and capacity
+s := make([]int, 3, 10)
+
+// Map
+ages := map[string]int{
+  "Alice": 30,
+  "Bob":   25,
+}
+ages["Charlie"] = 35
+
+// Check if key exists
+age, ok := ages["Alice"]
+if ok {
+  fmt.Println("Alice is", age)
+}
+
+// Delete a key
+delete(ages, "Bob")</code></pre>
+
+  <h2>9. Structs</h2>
+  <pre><code>type Person struct {
+  Name string
+  Age  int
+  Email string
+}
+
+// Create a struct
+p1 := Person{Name: "Alice", Age: 30, Email: "alice@example.com"}
+p2 := Person{"Bob", 25, "bob@example.com"} // positional
+
+// Access fields
+fmt.Println(p1.Name)
+
+// Methods on structs
+func (p Person) Greet() string {
+  return fmt.Sprintf("Hi, I am %s and I am %d years old", p.Name, p.Age)
+}
+
+// Pointer receiver — modifies the original
+func (p *Person) Birthday() {
+  p.Age++
+}</code></pre>
+
+  <h2>10. Pointers</h2>
+  <pre><code>x := 42
+p := &x        // p holds the memory address of x
+fmt.Println(*p) // dereference — prints 42
+*p = 100       // modifies x through the pointer
+fmt.Println(x)  // prints 100
+
+// Pointer to struct
+person := &Person{Name: "Alice", Age: 30}
+person.Age++ // Go auto-dereferences — no need for (*person).Age</code></pre>
+
+  <h2>11. Interfaces</h2>
+  <pre><code>// Define an interface
+type Animal interface {
+  Sound() string
+  Name() string
+}
+
+// Implement it implicitly — no "implements" keyword
+type Dog struct{ name string }
+func (d Dog) Sound() string { return "Woof" }
+func (d Dog) Name() string  { return d.name }
+
+type Cat struct{ name string }
+func (c Cat) Sound() string { return "Meow" }
+func (c Cat) Name() string  { return c.name }
+
+// Use the interface
+func describe(a Animal) {
+  fmt.Printf("%s says %s\n", a.Name(), a.Sound())
+}
+
+dog := Dog{name: "Rex"}
+cat := Cat{name: "Whiskers"}
+describe(dog) // Rex says Woof
+describe(cat) // Whiskers says Meow</code></pre>
+
+  <h2>12. Error handling</h2>
+  <pre><code>// errors are values — always the last return value
+func readFile(path string) (string, error) {
+  if path == "" {
+    return "", errors.New("path cannot be empty")
+  }
+  // ... read file
+  return content, nil
+}
+
+// Always check errors
+content, err := readFile("data.txt")
+if err != nil {
+  log.Fatal(err)
+}
+
+// Wrap errors with context (Go 1.13+)
+if err != nil {
+  return fmt.Errorf("readFile failed: %w", err)
+}</code></pre>
+
+  <blockquote>Go's error handling is explicit by design. There are no exceptions — errors are just values you check and handle. This makes failure paths visible and impossible to accidentally ignore.</blockquote>
 `,
   };
   return content[slug] ?? "<p>Content coming soon.</p>";
