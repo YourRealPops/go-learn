@@ -117,8 +117,8 @@ func main() {
 {
   slug: "go-syntax",
   chapter: 2,
-  title: "Go Syntax — The Complete Guide",
-  description: "A comprehensive walkthrough of Go's syntax — from packages to pointers.",
+  title: "Go Syntax. The Complete Guide",
+  description: "A comprehensive walkthrough of Go's syntax, from packages to pointers.",
   duration: 25,
   challenge: "Write a Go program that declares a struct called Person with Name (string) and Age (int) fields. Create two people, print their details using a method called Greet() that returns a greeting string, and use a for loop to print both.",
   hints: [
@@ -257,15 +257,15 @@ import (
   "math"
   "strings"
 )</code></pre>
-  <p>Unused imports are a <strong>compile error</strong> in Go — this keeps code clean by design.</p>
+  <p>Unused imports are a <strong>compile error</strong> in Go, this keeps code clean by design.</p>
 
   <h2>2. Variables</h2>
   <p>Go has two ways to declare variables:</p>
-  <pre><code>// Explicit — works anywhere
+  <pre><code>// Explicit: works anywhere
 var name string = "Alice"
 var age int = 30
 
-// Short declaration — inside functions only
+// Short declaration: inside functions only
 name := "Alice"
 age := 30
 
@@ -274,7 +274,7 @@ var (
   host string = "localhost"
   port int    = 8080
 )</code></pre>
-  <p>Every variable is initialised to its <strong>zero value</strong> if not assigned — <code>""</code> for strings, <code>0</code> for numbers, <code>false</code> for booleans.</p>
+  <p>Every variable is initialised to its <strong>zero value</strong> if not assigned; <code>""</code> for strings, <code>0</code> for numbers, <code>false</code> for booleans.</p>
 
   <h2>3. Basic types</h2>
   <pre><code>var s string    = "hello"
