@@ -98,6 +98,7 @@ func (s *RunnerService) runGoDiv(code string) (*RunResult, error) {
 	}
 
 	return &RunResult{Output: output, IsError: false}, nil
+	
 }
 
 // runPlayground uses the play.golang.org endpoint

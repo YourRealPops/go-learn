@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import LessonContent from "@/components/LessonContent";
 import OutputPanel from "@/components/OutputPanel";
-import type { Lesson } from "@/lib/types";
 import { apiRunCode } from "@/lib/api";
+import { useProgressStore } from "@/lib/progress-store";
+import { useAuthStore } from "@/lib/auth-store";
+import type { Lesson } from "@/lib/types";
 
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
   ssr: false,
@@ -20,35 +22,64 @@ interface LessonPageClientProps {
   lesson: Lesson;
 }
 
+interface TestResult {
+  name: string;
+  passed: boolean;
+  expected?: string;
+  got?: string;
+}
+
 export default function LessonPageClient({ lesson }: LessonPageClientProps) {
   const [code, setCode] = useState(lesson.starterCode);
   const [output, setOutput] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<TestResult[] | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [activeTab, setActiveTab] = useState<"output" | "tests">("output");
+  const [hasRun, setHasRun] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  const { isCompleted, markComplete, fetchProgress } = useProgressStore();
+  const { isLoggedIn } = useAuthStore();
+  const completed = isCompleted(lesson.slug);
+
+  // Fetch progress from backend on mount
+  useEffect(() => {
+    if (isLoggedIn) fetchProgress();
+  }, [isLoggedIn, fetchProgress]);
 
   const runCode = useCallback(async () => {
-  setIsRunning(true);
-  setOutput(null);
-  setTestResults(null);
-  try {
-    const data = await apiRunCode(code, lesson.slug);
-    setOutput(data.output ?? "No output");
-    setActiveTab("output");
-  } catch (err) {
-    setOutput(err instanceof Error ? err.message : "Runner unavailable");
-  } finally {
-    setIsRunning(false);
-  }
-}, [code, lesson.slug]);
+    setIsRunning(true);
+    setOutput(null);
+    setTestResults(null);
+    try {
+      const data = await apiRunCode(code, lesson.slug);
+      setOutput(data.output ?? "No output");
+      setHasRun(true);
+      setActiveTab("output");
+    } catch (err) {
+      setOutput(err instanceof Error ? err.message : "Runner unavailable");
+      setHasRun(true);
+    } finally {
+      setIsRunning(false);
+    }
+  }, [code, lesson.slug]);
+
+  const handleMarkComplete = async () => {
+    if (!isLoggedIn) return;
+    setIsCompleting(true);
+    await markComplete(lesson.slug);
+    setIsCompleting(false);
+  };
 
   const resetCode = useCallback(() => {
     setCode(lesson.starterCode);
     setOutput(null);
     setTestResults(null);
+    setHasRun(false);
   }, [lesson.starterCode]);
 
-  const allTestsPassed = testResults?.every((t) => t.passed) ?? false;
+  const hasError = output?.toLowerCase().includes("error") ||
+    output?.toLowerCase().includes("undefined");
 
   return (
     <div className="flex h-[calc(100vh-56px)] overflow-hidden">
@@ -63,13 +94,38 @@ export default function LessonPageClient({ lesson }: LessonPageClientProps) {
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono text-zinc-500">main.go</span>
-            {allTestsPassed && (
-              <span className="text-xs bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded px-2 py-0.5">
-                All tests passing ✓
+            {completed && (
+              <span className="text-xs bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded px-2 py-0.5 flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                Completed
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
+            {/* Mark complete button — shows after running code */}
+            {hasRun && !completed && !hasError && isLoggedIn && (
+              <button
+                onClick={handleMarkComplete}
+                disabled={isCompleting}
+                className="flex items-center gap-1.5 text-xs bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-medium px-3 py-1.5 rounded-md transition-colors"
+              >
+                {isCompleting ? (
+                  <>
+                    <span className="w-3 h-3 border-2 border-emerald-500/50 border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Mark complete
+                  </>
+                )}
+              </button>
+            )}
             <button
               onClick={resetCode}
               className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-1 rounded hover:bg-zinc-800"
@@ -91,7 +147,7 @@ export default function LessonPageClient({ lesson }: LessonPageClientProps) {
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
-                  Run  ⌘↵
+                  Run ⌘↵
                 </>
               )}
             </button>
@@ -120,11 +176,4 @@ export default function LessonPageClient({ lesson }: LessonPageClientProps) {
       </div>
     </div>
   );
-}
-
-interface TestResult {
-  name: string;
-  passed: boolean;
-  expected?: string;
-  got?: string;
 }
