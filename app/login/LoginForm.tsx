@@ -28,8 +28,13 @@ export default function LoginForm() {
       const from = searchParams.get("from") ?? "/";
       router.push(from);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        setError("Network error: Unable to connect to the server. Please check your connection.");
+      } else {
+        setError(err instanceof Error ? err.message : "Login failed");
+      }
     } finally {
+
       setLoading(false);
     }
   }

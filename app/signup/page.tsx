@@ -41,8 +41,13 @@ export default function SignupPage() {
 
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed");
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        setError("Network error: Unable to connect to the server. Please check your connection.");
+      } else {
+        setError(err instanceof Error ? err.message : "Signup failed");
+      }
     } finally {
+
       setLoading(false);
     }
   }
